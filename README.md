@@ -12,3 +12,5 @@ Usage:
 - download your pics from your mobile phone (I used Dropbox Camera Upload)
 - set the path to your pics folder in the R script
 - run the script
+
+The map will be exported as a pdf in the same folder you set as path.
