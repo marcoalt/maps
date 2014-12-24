@@ -81,6 +81,8 @@ picsLocationsReduced <- picsLocations[picsLocations$distance > distThreshold, ]
 print(nrow(picsLocationsReduced))
 #compute days spent in each location
 picsLocationsReduced[, "days"] <- c(diff(picsLocationsReduced$julianDate), 0)
+#circles look better if time spent is computed on a logarithmic scale
+picsLocationsReduced[, "days"] <- log(picsLocationsReduced[, "days"])
 maxDays <- max(picsLocationsReduced$days, na.rm = TRUE)
 
 scaleFactorCircles <- 5
