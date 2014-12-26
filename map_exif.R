@@ -2,7 +2,7 @@ library(maps)
 library(geosphere)
 library(scales) #used for transparencies
 
-picsPath <- "/Users/Marco/Dropbox/Camera Uploads/"
+picsPath <- "/Users/Marco/Dropbox/Camera Uploads/marco2012_2014/"
 
 convertCoordinates <- function(coordinatesDegreesLat, coordinatesDegreesLon)
 {
@@ -70,26 +70,65 @@ for(indexLine in 1:(length(info)-2))
 picsLocations <- data.frame(picsLocations)
 colnames(picsLocations) <- c("latitude","longitude","julianDate") #julian dates since we need only days differences
 
+#uncomment to set starting date
+#firstDate <- as.Date("2014:01:01", "%Y:%m:%d")
+#picsLocations <- picsLocations[picsLocations$julianDate >= firstDate, ]
+
+#order by date (should be already ordered)
+picsLocations <- picsLocations[order(picsLocations$julianDate), ]
+
 picsLocations[, "distance"] <- c(0, getDistance(picsLocations[1:(nrow(picsLocations)-1),]$latitude,
-                                           picsLocations[1:(nrow(picsLocations)-1),]$longitude,
-                                           picsLocations[2:nrow(picsLocations),]$latitude,
-                                           picsLocations[2:nrow(picsLocations),]$longitude))
+                                                picsLocations[1:(nrow(picsLocations)-1),]$longitude,
+                                                picsLocations[2:nrow(picsLocations),]$latitude,
+                                                picsLocations[2:nrow(picsLocations),]$longitude))
 
 #filter out locations closer than distThreshold kilometers
+#compute time spent in each location
+#determine number of pics taken per location
 distThreshold <- 300
-picsLocationsReduced <- picsLocations[picsLocations$distance > distThreshold, ]
-print(nrow(picsLocationsReduced))
-#compute days spent in each location
-picsLocationsReduced[, "days"] <- c(diff(picsLocationsReduced$julianDate), 0)
-#circles look better if time spent is computed on a logarithmic scale
-picsLocationsReduced[, "days"] <- log(picsLocationsReduced[, "days"])
-maxDays <- max(picsLocationsReduced$days, na.rm = TRUE)
+picsLocationsReduced <- c()
+#do this in a loop to keep track of how many pictures were taken
+picsHere <- 1
+timeHere <- 1
+for(indexPic in 2:nrow(picsLocations))
+{
+  if(picsLocations[indexPic, ]$distance > distThreshold)
+  {
+    picsHere <- picsHere + 1
+    timeHere <- timeHere + picsLocations[indexPic, ]$julianDate - picsLocations[(indexPic-1), ]$julianDate
+    picsOverTime <- round(picsHere/timeHere, 1)
+    picsLocationsReduced <- rbind(picsLocationsReduced, cbind(picsLocations[(indexPic-1), ], picsHere, timeHere, picsOverTime) )
+    #reset variables
+    picsHere <- 1
+    timeHere <- 1
+    ##add last one
+    if(indexPic == nrow(picsLocations))
+    {
+      picsLocationsReduced <- rbind(picsLocationsReduced, cbind(picsLocations[indexPic, ], 1, 1, 1) )
+    }
+  } else {
+    picsHere <- picsHere + 1
+    timeHere <- timeHere + picsLocations[indexPic, ]$julianDate - picsLocations[(indexPic-1), ]$julianDate
+    picsOverTime <- round(picsHere/timeHere, 1)
+    ##add last one
+    if(indexPic == nrow(picsLocations))
+    {
+      picsLocationsReduced <- rbind(picsLocationsReduced, cbind(picsLocations[indexPic, ], picsHere, timeHere, picsOverTime) )
+    }
+  }
+}
 
-scaleFactorCircles <- 5
+#plot time spent in each location + great cricles between locations
+#better plotting over logarithmic scale
+picsLocationsReduced[, "timeHere"] <- log(picsLocationsReduced$timeHere)
+maxDays <- max(picsLocationsReduced$timeHere, na.rm = TRUE)
+
+scaleFactorCircles <- 3
 alphaLevel <- 0.8
 pal <- colorRampPalette(c("#333333", "#12c4db", "#1292db"))
 colors <- pal(100)
-pdf(paste(picsPath,"map.pdf",sep=""), width=22, height=14)
+pdf(paste(picsPath,"mapTime.pdf",sep=""), width=11, height=7)
+
 map("world", col="#1b1b1b", fill=TRUE, bg="#000000", lwd=0.05)#, xlim=xlim, ylim=ylim)
 for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
 {
@@ -104,6 +143,36 @@ for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
   colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
   lines(inter, col = colors[colindex], lwd = 2) 
   #points color and size changes based on time spent in each location
-  colindex <- round( picsLocationsReduced[indexLoc,]$days/maxDays * length(colors) )
-  points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$days/maxDays*scaleFactorCircles)
+  colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+  points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
 }
+
+dev.off()
+
+#plot number of pics in each location (normalized by time spent) + great cricles between locations
+picsLocationsReduced[, "picsOverTime"] <- log(picsLocationsReduced[, "picsOverTime"])
+maxPics <- max(picsLocationsReduced$picsOverTime, na.rm = TRUE)
+
+pal <- colorRampPalette(c("#333333", "#ffe400", "#ff9c00"))
+colors <- pal(100)
+pdf(paste(picsPath,"mapNumPics.pdf",sep=""), width=11, height=7)
+
+map("world", col="#1b1b1b", fill=TRUE, bg="#000000", lwd=0.05)#, xlim=xlim, ylim=ylim)
+for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
+{
+  currLat <- picsLocationsReduced[indexLoc,]$latitude
+  currLon <- picsLocationsReduced[indexLoc,]$longitude
+  nextLat <- picsLocationsReduced[(indexLoc+1),]$latitude
+  nextLon <- picsLocationsReduced[(indexLoc+1),]$longitude
+  daysDiff <- picsLocationsReduced[(indexLoc+1),]$julianDate - picsLocationsReduced[(indexLoc),]$julianDate
+  
+  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 100, addStartEnd = TRUE)
+  #lines color changes sequentially
+  colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+  lines(inter, col = colors[colindex], lwd = 2) 
+  #points color and size changes based on time spent in each location
+  colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
+  points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
+}
+
+dev.off()
