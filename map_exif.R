@@ -104,7 +104,7 @@ for(indexPic in 2:nrow(picsLocations))
     ##add last one
     if(indexPic == nrow(picsLocations))
     {
-      picsLocationsReduced <- rbind(picsLocationsReduced, cbind(picsLocations[indexPic, ], 1, 1, 1) )
+      picsLocationsReduced <- rbind(picsLocationsReduced, cbind(picsLocations[indexPic, ], picsHere=1, timeHere=1, picsOverTime=1) )
     }
   } else {
     picsHere <- picsHere + 1
