@@ -138,13 +138,30 @@ for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
   nextLon <- picsLocationsReduced[(indexLoc+1),]$longitude
   daysDiff <- picsLocationsReduced[(indexLoc+1),]$julianDate - picsLocationsReduced[(indexLoc),]$julianDate
   
-  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 100, addStartEnd = TRUE)
-  #lines color changes sequentially
-  colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-  lines(inter, col = colors[colindex], lwd = 2) 
-  #points color and size changes based on time spent in each location
-  colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
-  points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+  #if(currLon < 0 &)
+  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 150, addStartEnd = TRUE, breakAtDateLine = TRUE)
+  if(length(inter) != 2) #there is no crossing of the dateline
+  {
+    #lines color changes sequentially
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(inter, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+  } else {
+    interFirstHalf <- inter[[1]]
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(interFirstHalf, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+    interSecondHalf <- inter[[2]]
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(interSecondHalf, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+    }
 }
 
 dev.off()
@@ -166,13 +183,29 @@ for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
   nextLon <- picsLocationsReduced[(indexLoc+1),]$longitude
   daysDiff <- picsLocationsReduced[(indexLoc+1),]$julianDate - picsLocationsReduced[(indexLoc),]$julianDate
   
-  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 100, addStartEnd = TRUE)
-  #lines color changes sequentially
-  colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-  lines(inter, col = colors[colindex], lwd = 2) 
-  #points color and size changes based on time spent in each location
-  colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
-  points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
+  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 150, addStartEnd = TRUE, breakAtDateLine = TRUE)
+  if(length(inter) != 2) #there is no crossing of the dateline
+  {
+    #lines color changes sequentially
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(inter, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
+  } else {
+    interFirstHalf <- inter[[1]]
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(interFirstHalf, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
+    interSecondHalf <- inter[[2]]
+    colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
+    lines(interSecondHalf, col = colors[colindex], lwd = 2) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
+    points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
+  }
 }
 
 dev.off()
