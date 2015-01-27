@@ -14,3 +14,5 @@ Usage:
 - run the script
 
 The map will be exported as a pdf in the same folder you set as path.
+
+Find out more here: http://www.marcoaltini.com/blog/map-your-trips-using-pics-from-your-phone-code
