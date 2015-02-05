@@ -17,5 +17,6 @@ The map will be exported as a pdf in the same folder you set as path.
 
 Find out more here: http://www.marcoaltini.com/blog/map-your-trips-using-pics-from-your-phone-code
 
-Example:
-![alt tag](http://www.marcoaltini.com/uploads/1/3/2/3/13234002/1952883_orig.jpg)
+Examples:
+![alt tag](http://www.marcoaltini.com/uploads/1/3/2/3/13234002/1747146_orig.jpg)
+![alt tag](http://www.marcoaltini.com/uploads/1/3/2/3/13234002/7856923_orig.jpg?826)
