@@ -2,7 +2,7 @@ library(maps)
 library(geosphere)
 library(scales) #used for transparencies
 
-picsPath <- "/Users/Marco/Dropbox/Camera Uploads/marco2012_2014/"
+picsPath <- "/Users/Marco/Dropbox/Camera Uploads/marco2012_2015/"
 
 convertCoordinates <- function(coordinatesDegreesLat, coordinatesDegreesLon)
 {
@@ -63,16 +63,19 @@ for(indexLine in 1:(length(info)-2))
     coordinatesFloat <- convertCoordinates(coordinatesDegreesLat, coordinatesDegreesLon)
     
     date <- strsplit(info[indexLine+2], "[ ]+")[[1]][4] #get date only
+    year <- as.numeric(substr(date, 0, 4))
     date <- as.Date(date, "%Y:%m:%d")
-    picsLocations <- rbind(picsLocations, c(coordinatesFloat[[1]], coordinatesFloat[[2]], date))
+    picsLocations <- rbind(picsLocations, c(coordinatesFloat[[1]], coordinatesFloat[[2]], date, year))
   }
 }
 picsLocations <- data.frame(picsLocations)
-colnames(picsLocations) <- c("latitude","longitude","julianDate") #julian dates since we need only days differences
+colnames(picsLocations) <- c("latitude","longitude","julianDate", "year") #julian dates since we need only days differences
 
 #uncomment to set starting date
-#firstDate <- as.Date("2014:01:01", "%Y:%m:%d")
+#firstDate <- as.Date("2015:01:01", "%Y:%m:%d")
 #picsLocations <- picsLocations[picsLocations$julianDate >= firstDate, ]
+
+picsLocations$year <- as.factor(picsLocations$year)
 
 #order by date (should be already ordered)
 picsLocations <- picsLocations[order(picsLocations$julianDate), ]
@@ -123,6 +126,7 @@ for(indexPic in 2:nrow(picsLocations))
 picsLocationsReduced[, "timeHere"] <- log(picsLocationsReduced$timeHere)
 maxDays <- max(picsLocationsReduced$timeHere, na.rm = TRUE)
 
+line_width <- 1
 scaleFactorCircles <- 3
 alphaLevel <- 0.8
 pal <- colorRampPalette(c("#333333", "#12c4db", "#1292db"))
@@ -144,20 +148,20 @@ for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
   {
     #lines color changes sequentially
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(inter, col = colors[colindex], lwd = 2) 
+    lines(inter, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
   } else {
     interFirstHalf <- inter[[1]]
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(interFirstHalf, col = colors[colindex], lwd = 2) 
+    lines(interFirstHalf, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
     interSecondHalf <- inter[[2]]
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(interSecondHalf, col = colors[colindex], lwd = 2) 
+    lines(interSecondHalf, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
@@ -188,24 +192,70 @@ for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
   {
     #lines color changes sequentially
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(inter, col = colors[colindex], lwd = 2) 
+    lines(inter, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
   } else {
     interFirstHalf <- inter[[1]]
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(interFirstHalf, col = colors[colindex], lwd = 2) 
+    lines(interFirstHalf, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
     interSecondHalf <- inter[[2]]
     colindex <- round( (indexLoc / nrow(picsLocationsReduced)) * length(colors) )
-    lines(interSecondHalf, col = colors[colindex], lwd = 2) 
+    lines(interSecondHalf, col = colors[colindex], lwd = line_width) 
     #points color and size changes based on time spent in each location
     colindex <- round( picsLocationsReduced[indexLoc,]$picsOverTime/maxPics * length(colors) )
     points(currLon, currLat, col = alpha(colors[colindex], alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$picsOverTime/maxPics*scaleFactorCircles)
   }
 }
 
+dev.off()
+
+
+##plot different colors per year
+#plot time spent in each location + great cricles between locations
+#better plotting over logarithmic scale
+colors_years = c("brown1", "bisque1", "aquamarine1", "darkgoldenrod1", "darkolivegreen1", "azure3", "coral", "cadetblue1", "ghostwhite", "khaki1", "lightpink")
+scaleFactorCircles <- 3
+alphaLevel <- 0.6
+pdf(paste(picsPath,"mapYear.pdf",sep=""), width=11, height=7)
+map("world", col="#1b1b1b", fill=TRUE, bg="#000000", lwd=0.05)#, xlim=xlim, ylim=ylim)
+for (indexLoc in 1:(nrow(picsLocationsReduced)-1))
+{
+  currLat <- picsLocationsReduced[indexLoc,]$latitude
+  currLon <- picsLocationsReduced[indexLoc,]$longitude
+  nextLat <- picsLocationsReduced[(indexLoc+1),]$latitude
+  nextLon <- picsLocationsReduced[(indexLoc+1),]$longitude
+  daysDiff <- picsLocationsReduced[(indexLoc+1),]$julianDate - picsLocationsReduced[(indexLoc),]$julianDate
+  
+  currcolor = colors_years[levels(picsLocationsReduced$year) == picsLocationsReduced[(indexLoc),]$year]
+  
+  #if(currLon < 0 &)
+  inter <- gcIntermediate(c(currLon, currLat), c(nextLon, nextLat), n = 150, addStartEnd = TRUE, breakAtDateLine = TRUE)
+  if(length(inter) != 2) #there is no crossing of the dateline
+  {
+    lines(inter, col = alpha(currcolor, alphaLevel), lwd = line_width) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+    points(currLon, currLat, col = alpha(currcolor, alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+  } else {
+    interFirstHalf <- inter[[1]]
+    lines(interFirstHalf, col = alpha(currcolor, alphaLevel), lwd = line_width) 
+    #points color and size changes based on time spent in each location
+    points(currLon, currLat, col = alpha(currcolor, alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+    interSecondHalf <- inter[[2]]
+    lines(interSecondHalf, col = alpha(currcolor, alphaLevel), lwd = line_width) 
+    #points color and size changes based on time spent in each location
+    colindex <- round( picsLocationsReduced[indexLoc,]$timeHere/maxDays * length(colors) )
+    points(currLon, currLat, col = alpha(currcolor, alphaLevel), pch=16, cex = picsLocationsReduced[indexLoc,]$timeHere/maxDays*scaleFactorCircles)
+  }
+}
+legend("topright", inset=.05, title="",
+       levels(picsLocationsReduced$year),
+       text.col=colors_years[1:length(levels(picsLocationsReduced$year))],
+       fill=colors_years[1:length(levels(picsLocationsReduced$year))],
+       bty = "n")
 dev.off()
