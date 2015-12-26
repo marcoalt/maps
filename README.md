@@ -1,7 +1,7 @@
 Map your trips using pics from your phone 
 ====
 
-This script provides R code to visualize GPS data using getoagged pictures. 
+This script provides R code to visualize GPS data using geotagged pictures. 
 
 Most pictures taken using a mobile phone get automatically geotagged. This script extracts metadata from JPEG files, including latitude, longitude and date when the picture was taken, and plots great circles between locations farther then a configurable threshold. Additionally, time spent in different locations is shown using circles of different sizes. 
 
